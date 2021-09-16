@@ -11,7 +11,16 @@ struct Person {
     age: usize,
 }
 
-// I AM NOT DONE
+#[derive(Debug)]
+struct ArgError;
+
+impl std::fmt::Display for ArgError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "args error")
+    }
+}
+impl error::Error for ArgError {}
+
 
 // Steps:
 // 1. If the length of the provided string is 0, an error should be returned
@@ -26,6 +35,27 @@ struct Person {
 impl FromStr for Person {
     type Err = Box<dyn error::Error>;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
+        if s.len() == 0 {
+            Err(ArgError.into())
+        } else {
+            let s = s.split(',').collect::<Vec<&str>>();
+            if s.len() != 2 {
+                Err(ArgError.into())
+            } else {
+                if s[0].len() > 0 {
+                    if let Ok(age) = s[1].to_string().parse::<usize>() {
+                        Ok(Person {
+                            name: String::from(s[0]),
+                            age,
+                        })
+                    } else {
+                        Err(ArgError.into())
+                    }
+                } else {
+                    Err(ArgError.into())
+                }
+            }
+        }
     }
 }
 
